@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Map Digitizer</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <style>
+            html,
+            body {
+                margin: 0;
+                height: 100%;
+                font-family: -apple-system, system-ui, sans-serif;
+                background: #222;
+                color: #eee;
+            }
+            #app {
+                display: flex;
+                height: 100vh;
+            }
+            #left {
+                flex: 1;
+                overflow: auto;
+                padding: 8px;
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+                position: relative;
+            }
+            #right {
+                width: 340px;
+                background: #1a1a1a;
+                padding: 12px;
+                overflow: auto;
+                border-left: 1px solid #333;
+            }
+            h2 {
+                margin: 4px 0 8px;
+                font-size: 14px;
+                color: #aaa;
+                text-transform: lowercase;
+                letter-spacing: 1px;
+            }
+            canvas {
+                cursor: crosshair;
+                background: #000;
+                max-width: 100%;
+            }
+            #drop {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #222;
+                border: 3px dashed #555;
+                color: #888;
+                font-size: 18px;
+                text-align: center;
+                padding: 40px;
+            }
+            #drop.over {
+                border-color: #7ae;
+                color: #7ae;
+                background: #1a2a3a;
+            }
+            #drop input {
+                display: none;
+            }
+            #drop label {
+                cursor: pointer;
+                color: #7ae;
+                text-decoration: underline;
+            }
+            .pick {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px;
+                border-bottom: 1px solid #2a2a2a;
+            }
+            .swatch {
+                width: 28px;
+                height: 28px;
+                border: 1px solid #555;
+                flex: 0 0 28px;
+            }
+            .meta {
+                flex: 1;
+                font-family: ui-monospace, monospace;
+                font-size: 11px;
+                color: #aaa;
+            }
+            .meta input {
+                width: 100%;
+                padding: 3px 5px;
+                font-size: 12px;
+                background: #111;
+                color: #eee;
+                border: 1px solid #444;
+                font-family: inherit;
+            }
+            .meta input:focus {
+                outline: none;
+                border-color: #7ae;
+            }
+            .desc {
+                font-size: 10px;
+                color: #666;
+                margin: -3px 0 6px 0;
+                line-height: 1.3;
+            }
+            .section-desc {
+                font-size: 10px;
+                color: #666;
+                margin: 0 0 6px 0;
+                line-height: 1.4;
+            }
+            .pick.excluded .swatch {
+                border-color: #a55;
+            }
+            .del {
+                background: #333;
+                color: #aaa;
+                border: 0;
+                width: 24px;
+                height: 24px;
+                cursor: pointer;
+                font-size: 14px;
+                border-radius: 3px;
+            }
+            .del:hover {
+                background: #a33;
+                color: #fff;
+            }
+            button.primary {
+                width: 100%;
+                padding: 10px;
+                background: #3a7;
+                color: #fff;
+                border: 0;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                margin-top: 8px;
+                border-radius: 4px;
+            }
+            button.primary:hover {
+                background: #4b8;
+            }
+            button.primary:disabled {
+                background: #444;
+                color: #888;
+                cursor: not-allowed;
+            }
+            .row {
+                display: flex;
+                gap: 6px;
+                margin: 6px 0;
+                align-items: center;
+            }
+            .row label {
+                flex: 1;
+                font-size: 11px;
+                color: #888;
+            }
+            .row input {
+                width: 80px;
+                padding: 3px 6px;
+                background: #111;
+                color: #eee;
+                border: 1px solid #444;
+                font-size: 12px;
+            }
+            #status {
+                font-size: 11px;
+                color: #888;
+                margin-top: 6px;
+                min-height: 16px;
+                white-space: pre-wrap;
+            }
+            #empty {
+                color: #666;
+                font-size: 11px;
+                text-align: center;
+                padding: 20px;
+            }
+            .help {
+                font-size: 11px;
+                color: #666;
+                line-height: 1.4;
+                margin-bottom: 8px;
+            }
+            .filename {
+                font-size: 11px;
+                color: #7ae;
+                word-break: break-all;
+            }
+            #reset {
+                background: none;
+                color: #666;
+                border: 1px solid #444;
+                font-size: 10px;
+                padding: 2px 6px;
+                cursor: pointer;
+                float: right;
+            }
+            #reset:hover {
+                color: #fff;
+                border-color: #888;
+            }
+            .crs {
+                font-size: 10px;
+                color: #666;
+                margin-top: 2px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <div id="left">
+                <canvas id="cv" style="display: none"></canvas>
+                <div id="drop">
+                    <div>
+                        <div style="font-size: 48px; margin-bottom: 14px">📂</div>
+                        <div>drag a .tif file here</div>
+                        <div style="font-size: 13px; margin-top: 6px">or <label for="file">browse</label></div>
+                        <input type="file" id="file" accept=".tif,.tiff,image/tiff" />
+                        <div style="font-size: 11px; color: #555; margin-top: 18px; max-width: 340px">
+                            everything runs in your browser. nothing is uploaded.<br />
+                            works best on georeferenced GeoTIFFs (EPSG:3857 or similar).
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="right">
+                <h2 style="display: flex; align-items: center">
+                    <span class="filename" id="filename" style="flex: 1">no file loaded</span
+                    ><button id="reset" style="display: none">reset</button>
+                </h2>
+                <div class="crs" id="crsInfo"></div>
+                <div class="help" style="margin-top: 10px">
+                    <b>click</b> a legend swatch (or clean district area) to add a district color.<br />
+                    <b>option/alt-click</b> to mark a color as excluded (roads, text, etc).
+                </div>
+
+                <div class="row"><label>min-area</label><input type="number" id="minArea" value="500" step="50" /></div>
+                <div class="desc">drop polygons smaller than this in CRS units (m² for EPSG:3857).</div>
+
+                <div class="row">
+                    <label>patch (px ±)</label><input type="number" id="patch" value="5" step="1" min="0" />
+                </div>
+                <div class="desc">
+                    average colors over a (2·patch+1)² window around each click; smooths out anti-aliasing at swatch
+                    edges.
+                </div>
+
+                <div class="row">
+                    <label>morph radius</label><input type="number" id="morphR" value="2" step="1" min="0" />
+                </div>
+                <div class="desc">
+                    smooths each cluster mask. opens (removes specks) then closes (fills small holes). 0 = off; bump to
+                    3-4 if text/roads still bleed into districts.
+                </div>
+
+                <div class="row">
+                    <label>shrink</label><input type="number" id="shrinkR" value="0" step="1" min="0" />
+                </div>
+                <div class="desc">
+                    extra inward buffer (px) applied after morphology. helps when joining attributes to parcels —
+                    slightly smaller masks stay inside their own districts and avoid bleeding onto adjacent parcels. 1-2
+                    px is usually enough.
+                </div>
+
+                <button class="primary" id="run" disabled>Run digitize → download geojson</button>
+                <div id="status"></div>
+
+                <h2 style="margin-top: 14px">districts (<span id="countDistricts">0</span>)</h2>
+                <div id="listDistricts"><div id="emptyD" class="section-desc">no picks yet — click the map</div></div>
+
+                <h2 style="margin-top: 14px">excluded (<span id="countExcluded">0</span>)</h2>
+                <div class="section-desc">
+                    non-district colors (roads, text, parcel lines). pixels closest to these get captured here so they
+                    don't bleed into districts — they aren't included in the GeoJSON.
+                </div>
+                <div id="listExcluded">
+                    <div id="emptyE" class="section-desc" style="text-align: center; opacity: 0.6">
+                        option/alt-click on the map to add
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- libraries: geotiff.js parses the TIF (incl. CRS/transform). d3-contour does
+     the per-cluster raster→polygon step. both via CDN, no build step. -->
+        <script src="https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/d3-contour@4.0.2/dist/d3-contour.min.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>
