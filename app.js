@@ -199,8 +199,13 @@ function renderPicks() {
 
   document.getElementById("countDistricts").textContent = nD;
   document.getElementById("countExcluded").textContent = nE;
-  if (nD === 0) districts.innerHTML = `<div class="section-desc" style="text-align:center;opacity:0.6">${state.name ? "click the map to add a district" : "load a tif to start"}</div>`;
-  if (nE === 0) excluded.innerHTML  = `<div class="section-desc" style="text-align:center;opacity:0.6">option/alt-click on the map to add</div>`;
+  const empty = (msg) => `<div class="section-desc" style="text-align:center;opacity:0.6">${msg}</div>`;
+  if (nD === 0) {
+    districts.innerHTML = empty(state.name ? "click the map to add a district" : "load a tif to start");
+  }
+  if (nE === 0) {
+    excluded.innerHTML = empty(state.name ? "option/alt-click on the map to add" : "load a tif to start");
+  }
 }
 
 // ---------- digitize ---------------------------------------------------------
@@ -361,3 +366,5 @@ drop.addEventListener("drop", (e) => {
 fileInput.addEventListener("change", (e) => { if (e.target.files[0]) loadTif(e.target.files[0]); });
 document.getElementById("reset").addEventListener("click", reset);
 runBtn.addEventListener("click", digitize);
+
+renderPicks();  // initial empty-state messages

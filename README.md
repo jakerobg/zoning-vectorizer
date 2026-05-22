@@ -4,7 +4,7 @@ A raster map vectorizer with added interactive color-pallete classification, bui
 
 (GeoTIFF) -> GeoJSON of district polygons.
 
-**Everything runs locally in the browser, and masks are traced using d3contour.**
+**Everything runs locally in the browser, and masks are traced using d3contour marching squares.**
 
 ## How to use it
 

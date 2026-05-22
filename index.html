@@ -35,7 +35,7 @@
             }
             h2 {
                 margin: 4px 0 8px;
-                font-size: 14px;
+                font-size: 16px;
                 color: #aaa;
                 text-transform: lowercase;
                 letter-spacing: 1px;
@@ -74,7 +74,7 @@
             .pick {
                 display: flex;
                 align-items: center;
-                gap: 6px;
+                gap: 10px;
                 padding: 6px;
                 border-bottom: 1px solid #2a2a2a;
             }
@@ -86,12 +86,14 @@
             }
             .meta {
                 flex: 1;
+                min-width: 0;
                 font-family: ui-monospace, monospace;
-                font-size: 11px;
+                font-size: 12px;
                 color: #aaa;
             }
             .meta input {
                 width: 100%;
+                box-sizing: border-box;
                 padding: 3px 5px;
                 font-size: 12px;
                 background: #111;
@@ -110,7 +112,7 @@
                 line-height: 1.3;
             }
             .section-desc {
-                font-size: 10px;
+                font-size: 12px;
                 color: #666;
                 margin: 0 0 6px 0;
                 line-height: 1.4;
@@ -122,11 +124,12 @@
                 background: #333;
                 color: #aaa;
                 border: 0;
-                width: 24px;
-                height: 24px;
+                width: 28px;
+                height: 28px;
+                flex: 0 0 28px;
                 cursor: pointer;
                 font-size: 14px;
-                border-radius: 3px;
+                border-radius: 1px;
             }
             .del:hover {
                 background: #a33;
@@ -185,7 +188,7 @@
                 padding: 20px;
             }
             .help {
-                font-size: 11px;
+                font-size: 12px;
                 color: #666;
                 line-height: 1.4;
                 margin-bottom: 8px;
@@ -238,9 +241,10 @@
                     ><button id="reset" style="display: none">reset</button>
                 </h2>
                 <div class="crs" id="crsInfo"></div>
-                <div class="help" style="margin-top: 10px">
+                <div class="help" style="margin-top: 10px; margin-bottom: 10px">
                     <b>click</b> a legend swatch (or clean district area) to add a district color.<br />
-                    <b>option/alt-click</b> to mark a color as excluded (roads, text, etc).
+                    <b>option/alt-click</b> to mark a color as excluded (roads, text, etc).<br />
+                    <b>optionally</b> add district abbreviation for classification.<br />
                 </div>
 
                 <div class="row"><label>min-area</label><input type="number" id="minArea" value="500" step="50" /></div>
@@ -275,18 +279,14 @@
                 <div id="status"></div>
 
                 <h2 style="margin-top: 14px">districts (<span id="countDistricts">0</span>)</h2>
-                <div id="listDistricts"><div id="emptyD" class="section-desc">no picks yet — click the map</div></div>
+                <div id="listDistricts"></div>
 
                 <h2 style="margin-top: 14px">excluded (<span id="countExcluded">0</span>)</h2>
                 <div class="section-desc">
                     non-district colors (roads, text, parcel lines). pixels closest to these get captured here so they
                     don't bleed into districts — they aren't included in the GeoJSON.
                 </div>
-                <div id="listExcluded">
-                    <div id="emptyE" class="section-desc" style="text-align: center; opacity: 0.6">
-                        option/alt-click on the map to add
-                    </div>
-                </div>
+                <div id="listExcluded"></div>
             </div>
         </div>
 
